@@ -9,8 +9,8 @@ var WebSocketService = function(model, webSocket) {
 	this.welcomeHandler = function(data) {
 		webSocketService.hasConnection = true;
 		
-		model.userTadpole.id = data.id;
-		model.tadpoles[data.id] = model.tadpoles[-1];
+		model.userTadpole.id = data.Id;
+		model.tadpoles[data.Id] = model.tadpoles[-1];
 		delete model.tadpoles[-1];
 		
 		$('#chat').initChat();
@@ -18,58 +18,58 @@ var WebSocketService = function(model, webSocket) {
 	
 	this.updateHandler = function(data) {
 		var newtp = false;
-		
-		if(!model.tadpoles[data.id]) {
+
+		if(!model.tadpoles[data.Id]) {
 			newtp = true;
-			model.tadpoles[data.id] = new Tadpole();
-			model.arrows[data.id] = new Arrow(model.tadpoles[data.id], model.camera);
+			model.tadpoles[data.Id] = new Tadpole();
+			model.arrows[data.Id] = new Arrow(model.tadpoles[data.Id], model.camera);
 		}
 		
-		var tadpole = model.tadpoles[data.id];
+		var tadpole = model.tadpoles[data.Id];
 		
-		if(tadpole.id == model.userTadpole.id) {
-			if(!model.userTadpole.name) {
-				tadpole.name = data.name;
+		if(data.Id == model.userTadpole.id) {
+			if(!model.userTadpole.Name) {
+				tadpole.name = data.Name;
 			}
 			return;
 		} else {
-			tadpole.name = data.name;
+			tadpole.name = data.Name;
 		}
 		
 		if(newtp) {
-			tadpole.x = data.x;
-			tadpole.y = data.y;
+			tadpole.x = data.X;
+			tadpole.y = data.Y;
 		} else {
-			tadpole.targetX = data.x;
-			tadpole.targetY = data.y;
+			tadpole.targetX = data.X;
+			tadpole.targetY = data.Y;
 		}
 		
-		tadpole.angle = data.angle;
-		tadpole.momentum = data.momentum;
+		tadpole.angle = data.Angle;
+		tadpole.momentum = data.Momentum;
 		
 		tadpole.timeSinceLastServerUpdate = 0;
 	}
 	
 	this.messageHandler = function(data) {
-		var tadpole = model.tadpoles[data.id];
+		var tadpole = model.tadpoles[data.Id];
 		if(!tadpole) {
 			return;
 		}
 		tadpole.timeSinceLastServerUpdate = 0;
-		tadpole.messages.push(new Message(data.message));
+		tadpole.messages.push(new Message(data.Message));
 	}
 	
 	this.closedHandler = function(data) {
-		if(model.tadpoles[data.id]) {
-			delete model.tadpoles[data.id];
-			delete model.arrows[data.id];
+		if(model.tadpoles[data.Id]) {
+			delete model.tadpoles[data.Id];
+			delete model.arrows[data.Id];
 		}
 	}
 	
 	this.processMessage = function(data) {
-		var fn = webSocketService[data.type + 'Handler'];
+		var fn = webSocketService[data.type.toLowerCase() + 'Handler'];
 		if (fn) {
-			fn(data);
+			fn(data.data);
 		}
 	}
 	
@@ -80,15 +80,16 @@ var WebSocketService = function(model, webSocket) {
 	
 	this.sendUpdate = function(tadpole) {
 		var sendObj = {
-			type: 'update',
-			x: tadpole.x.toFixed(1),
-			y: tadpole.y.toFixed(1),
-			angle: tadpole.angle.toFixed(3),
-			momentum: tadpole.momentum.toFixed(3)
+			Update: {
+				X: tadpole.x,
+				Y: tadpole.y,
+				Angle: tadpole.angle,
+				Momentum: tadpole.momentum
+			}
 		};
 		
 		if(tadpole.name) {
-			sendObj['name'] = tadpole.name;
+			sendObj.Update['Name'] = tadpole.name;
 		}
 		
 		webSocket.send(JSON.stringify(sendObj));
@@ -102,8 +103,7 @@ var WebSocketService = function(model, webSocket) {
 		}
 		
 		var sendObj = {
-			type: 'message',
-			message: msg
+			Message: { Message: msg }
 		};
 		
 		webSocket.send(JSON.stringify(sendObj));
