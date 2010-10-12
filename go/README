@@ -1,6 +1,13 @@
 rumpetgo is a Go back-end for Rumpetroll.  It implements the basic
 functionality: relaying of movement updates and messages between clients.
 
+Try it out (you must have Go installed, see http://golang.org/):
+  git clone http://github.com/nf/Rumpetroll.git
+  cd Rumpetroll/go
+  gomake
+  ./rumpetgo
+and load http://localhost:8080/ in your browser.
+
 Captivated by Rumpetroll's brilliantly simple concept, I wrote this as an
 exercise to see how one might build its back-end in Go.
 
