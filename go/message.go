@@ -2,7 +2,8 @@ package main
 
 type Update struct {
 	Id int
-	Name, X, Y, Angle, Momentum string
+	Name string
+	X, Y, Angle, Momentum float
 }
 
 type Message struct {
