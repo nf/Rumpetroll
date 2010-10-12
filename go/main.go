@@ -7,7 +7,7 @@ import (
 
 const (
 	httpListen = ":8080"
-	staticDir = "../public"
+	staticDir  = "../public"
 )
 
 func StaticHandler(w http.ResponseWriter, r *http.Request) {
@@ -24,4 +24,3 @@ func main() {
 	http.HandleFunc("/", StaticHandler)
 	http.ListenAndServe(httpListen, nil)
 }
-

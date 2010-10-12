@@ -14,7 +14,7 @@ var SockHandler = websocket.Handler(SockServer)
 func SockServer(ws *websocket.Conn) {
 	// create and send channel to muxer
 	ch := make(MessageChannel)
-	Incoming <- ch 
+	Incoming <- ch
 	// get id from muxer
 	id, ok := (<-ch).(int)
 	if !ok {
@@ -29,7 +29,7 @@ func SockServer(ws *websocket.Conn) {
 }
 
 type inMsg struct {
-	Update *Update
+	Update  *Update
 	Message *Message
 }
 
@@ -67,4 +67,3 @@ func writeMessages(w io.Writer, ch chan interface{}) {
 		})
 	}
 }
-

@@ -1,13 +1,13 @@
 package main
 
 type Update struct {
-	Id int
-	Name string
+	Id                    int
+	Name                  string
 	X, Y, Angle, Momentum float
 }
 
 type Message struct {
-	Id int
+	Id      int
 	Message string
 }
 
