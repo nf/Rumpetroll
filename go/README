@@ -1,0 +1,18 @@
+rumpetgo is a Go back-end for Rumpetroll.  It implements the basic
+functionality: relaying of movement updates and messages between clients.
+
+Captivated by Rumpetroll's brilliantly simple concept, I wrote this as an
+exercise to see how one might build its back-end in Go.
+
+The Ruby back-end uses channels and an event-driven approach, so it's similar
+in some ways. It would be interesting to see a comparison of performance
+numbers.
+
+I made some small modifications to the front-end code to make the Go side
+simpler, but were I doing it from scratch I could further simplify both sides.
+
+Kudos to the Rumpetroll guys for producing such a great program and for
+releasing the code! :-)
+
+Andrew Gerrand <nf@wh3rd.net>
+October 2010
