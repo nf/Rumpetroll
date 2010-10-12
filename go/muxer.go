@@ -30,6 +30,7 @@ func Muxer() {
 			id = n.Id
 		case Closed:
 			id = n.Id
+			close(chans[id])
 			chans[id] = nil, false
 		default:
 			log.Stderr("unrecognized message", m)
