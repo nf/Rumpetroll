@@ -1,14 +1,10 @@
 package main
 
-import (
-	"log"
-)
+import "log"
 
 type MessageChannel chan interface{}
 
-var (
-	Incoming = make(MessageChannel)
-)
+var Incoming = make(MessageChannel)
 
 func init() {
 	go Muxer()
@@ -33,7 +29,7 @@ func Muxer() {
 			close(chans[id])
 			chans[id] = nil, false
 		default:
-			log.Stderr("unrecognized message", m)
+			log.Println("unrecognized message:", m)
 		}
 		if id == 0 {
 			continue
