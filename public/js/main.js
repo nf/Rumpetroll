@@ -3,37 +3,46 @@ var settings = new Settings();
 var debug = false;
 var isStatsOn = false;
 
-try {
-	var ua = navigator.userAgent.toLowerCase();
-	if(ua.search('chrome') < 0 && ua.search('safari') < 0) {
-		alert('This is an experiment that has only been tested in Chrome, Safari and Firefox 4Beta, and may not work in other browsers');
-	}
-} catch(err) {
-	alert('This is an experiment that has only been tested in Chrome, Safari and Firefox 4Beta, and may not work in other browsers');
-}
 
+var app;
 var runLoop = function() {
 	app.update();
 	app.draw();
 }
+var initApp = function() {
+	if (app!=null) { return; }
+	app = new App(settings, document.getElementById('canvas'));
 
-var app = new App(settings, document.getElementById('canvas'));
+	window.addEventListener('resize', app.resize, false);
 
-window.addEventListener('resize', app.resize, false);
+	document.addEventListener('mousemove', 		app.mousemove, false);
+	document.addEventListener('mousedown', 		app.mousedown, false);
+	document.addEventListener('mouseup',			app.mouseup, false);
+	
+	document.addEventListener('touchstart',   app.touchstart, false);
+	document.addEventListener('touchend',     app.touchend, false);
+	document.addEventListener('touchcancel',  app.touchend, false);
+	document.addEventListener('touchmove',    app.touchmove, false);
 
-document.addEventListener('mousemove', app.mousemove, false);
-document.addEventListener('mousedown', app.mousedown, false);
-document.addEventListener('mouseup', app.mouseup, false);
+	setInterval(runLoop,30);
+}
 
-document.addEventListener('touchstart',   app.touchstart, false);
-document.addEventListener('touchend',     app.touchend, false);
-document.addEventListener('touchcancel',  app.touchend, false);
-document.addEventListener('touchmove',    app.touchmove, false);
+var forceInit = function() {
+	initApp()
+	document.getElementById('unsupported-browser').style.display = "none";
+	return false;
+}
 
+if(Modernizr.canvas && Modernizr.websockets) {
+	initApp();
+} else {
+	document.getElementById('unsupported-browser').style.display = "block";	
+	document.getElementById('force-init-button').addEventListener('click', forceInit);
+}
 
-setInterval(runLoop,30);
 
 var addStats = function() {
+	if (isStatsOn) { return; }
 	// Draw fps
 	var stats = new Stats();
 	document.getElementById('fps').appendChild(stats.domElement);
@@ -48,19 +57,16 @@ var addStats = function() {
 	  array.length = from < 0 ? array.length + from : from;
 	  return array.push.apply(array, rest);
 	};
+	isStatsOn = true;
 }
 
 document.addEventListener('keydown',function(e) {
-	if(e.which == 27 && !isStatsOn) {
+	if(e.which == 27) {
 		addStats();
-		isStatsOn = true;
 	}
 })
 
-if(debug) {
-	addStats();
-	isStatsOn = true;
-}
+if(debug) { addStats(); }
 
 $(function() {
 	$('a[rel=external]').click(function(e) {
