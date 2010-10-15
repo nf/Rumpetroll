@@ -29,7 +29,7 @@ func Muxer() {
 			close(chans[id])
 			chans[id] = nil, false
 		default:
-			log.Stderr("unrecognized message:", m)
+			log.Println("unrecognized message:", m)
 		}
 		if id == 0 {
 			continue

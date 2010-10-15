@@ -18,7 +18,7 @@ func SockServer(ws *websocket.Conn) {
 	// get id from muxer
 	id, ok := (<-ch).(int)
 	if !ok {
-		log.Stderr("got unexpected type waiting for id")
+		log.Println("got unexpected type waiting for id")
 		return
 	}
 	// send welcome message
@@ -43,7 +43,7 @@ func readMessages(id int, r io.Reader) {
 				Incoming <- Closed{Id: id}
 				return
 			}
-			log.Stderr("decode error:", err)
+			log.Println("decode error:", err)
 			continue
 		}
 		if blob.Update != nil {
