@@ -1,7 +1,6 @@
 package main
 
 import (
-	"container/vector"
 	"log"
 	"powerhouse"
 	"sync"
@@ -11,13 +10,15 @@ import (
 var _ = log.Print
 
 const (
+	startRadius = 200
 	displayDelay = 100e6
 	triggerDistance = 8
 )
 
 var (
 	contentIds       = make(chan int)
-	rootContentGroup = NewContentGroup(loadStartContent)
+	contentGroupIds  = make(chan int)
+	rootContentGroup *ContentGroup
 )
 
 func init() {
@@ -26,6 +27,16 @@ func init() {
 		for i := 0; ; i++ {
 			contentIds <- i
 		}
+	}()
+	go func() {
+		for i := 0; ; i++ {
+			contentGroupIds <- i
+		}
+	}()
+	go func() {
+		// FIXME: this could really be up in the var decl above
+		// but that causes throw: init sleeping for no good reason
+		rootContentGroup = NewContentGroup(loadStartContent)
 	}()
 }
 
@@ -36,11 +47,11 @@ func ContentLayer(ch MessageChannel) (inch MessageChannel) {
 }
 
 func serveContent(inch, ch MessageChannel) {
-	var visibleGroups vector.Vector
+	visible := make(map[int]*ContentGroup)
 
 	// serve initial content items
 	rootContentGroup.Send(ch, displayDelay)
-	visibleGroups.Push(rootContentGroup)
+	visible[rootContentGroup.Id] = rootContentGroup
 
 	for m := range inch {
 		// before doing anything, forward message to muxer
@@ -53,15 +64,19 @@ func serveContent(inch, ch MessageChannel) {
 		// test if close to any content blocks
 		// if so, expand and display additional content
 		up := Point{X: u.X, Y: u.Y}
-		for _, d := range visibleGroups {
-			cg, ok := d.(*ContentGroup)
-			if !ok {
+		for _, cg := range visible {
+			ci := cg.Closest(up, triggerDistance)
+			if ci == nil {
 				continue
 			}
-			ci := cg.Closest(up, triggerDistance)
-			if ci != nil {
-				log.Println("Trigger", ci)
+			child := ci.Children()
+			if _, ok := visible[child.Id]; ok {
+				// already visible
+				continue
 			}
+			log.Println("Show", child)
+			go child.Send(ch, displayDelay)
+			visible[child.Id] = child
 		}
 	}
 }
@@ -84,12 +99,13 @@ func (ci *ContentItem) Children() *ContentGroup {
 }
 
 type ContentGroup struct {
+	Id	int
 	mu      sync.Mutex
 	content []*ContentItem
 }
 
 func NewContentGroup(loadFn func() []*Content) *ContentGroup {
-	cg := new(ContentGroup)
+	cg := &ContentGroup{Id: <-contentGroupIds}
 	cg.mu.Lock()
 	go func() {
 		content := loadFn()
@@ -137,7 +153,7 @@ func (cg *ContentGroup) Send(ch MessageChannel, ns int64) {
 func loadStartContent() []*Content {
 	n := 20
 	c := make([]*Content, n)
-	circ := Circle(Point{0, 0, 0}, 200, n)
+	circ := Circle(Point{}, startRadius, n)
 	for i := 0; i < n; i++ {
 		coord := <-circ
 		id := <-contentIds
