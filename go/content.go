@@ -15,28 +15,32 @@ const (
 )
 
 var (
-	contentIds = make(chan int)
+	contentIds       = make(chan int)
 	rootContentGroup = NewContentGroup(loadStartContent)
 )
 
-func init() { 
+func init() {
 	powerhouse.ApiKey = "a5863c45a7818ed"
-	go func() { for i := 0;; i++ { contentIds <- i } }()
+	go func() {
+		for i := 0; ; i++ {
+			contentIds <- i
+		}
+	}()
 }
 
-func contentLayer(ch MessageChannel) (inch MessageChannel) {
+func ContentLayer(ch MessageChannel) (inch MessageChannel) {
 	inch = make(MessageChannel)
 	go serveContent(inch, ch)
 	return
 }
 
 func serveContent(inch, ch MessageChannel) {
+	var visibleGroups vector.Vector
+
 	// serve initial content items
 	rootContentGroup.Send(ch, displayDelay)
+	visibleGroups.Push(rootContentGroup)
 
-	// 
-	var content vector.Vector
-	_ = content
 	for m := range inch {
 		// before doing anything, forward message to muxer
 		Incoming <- m
@@ -51,24 +55,40 @@ func serveContent(inch, ch MessageChannel) {
 	}
 }
 
+type ContentItem struct {
+	mu       sync.Mutex
+	content  *Content
+	children *ContentGroup
+}
+
+func (ci *ContentItem) Children() *ContentGroup {
+	ci.mu.Lock()
+	if ci.children == nil {
+		ci.children = NewContentGroup(func() []*Content {
+			return loadChildren(ci.content)
+		})
+	}
+	ci.mu.Unlock()
+	return ci.children
+}
+
 type ContentGroup struct {
 	mu      sync.Mutex
-	content []*Content
+	content []*ContentItem
 }
 
 func NewContentGroup(loadFn func() []*Content) *ContentGroup {
 	cg := new(ContentGroup)
 	cg.mu.Lock()
 	go func() {
-		cg.content = loadFn()
+		content := loadFn()
+		cg.content = make([]*ContentItem, len(content))
+		for i, c := range content {
+			cg.content[i] = &ContentItem{content: c}
+		}
 		cg.mu.Unlock()
 	}()
 	return cg
-}
-
-func (cg *ContentGroup) Closest(x, y, max float) *Content {
-	if !cg.loaded() { return nil }
-	return nil
 }
 
 func (cg *ContentGroup) loaded() bool {
@@ -80,24 +100,35 @@ func (cg *ContentGroup) loaded() bool {
 	return true
 }
 
-func (cg *ContentGroup) Send(ch MessageChannel, ns int64) {
-	for !cg.loaded() { return }
+func (cg *ContentGroup) Closest(x, y, max float) *Content {
+	if !cg.loaded() {
+		return nil
+	}
+	return nil
+}
 
+func (cg *ContentGroup) Send(ch MessageChannel, ns int64) {
+	for !cg.loaded() {
+		return
+	}
 	for _, c := range cg.content {
-		ch <- *c
+		ch <- *c.content
 		time.Sleep(ns)
 	}
 }
 
 func loadStartContent() []*Content {
-	n := 20 
+	n := 20
 	c := make([]*Content, n)
-	circ := Circle(0, 0, 200, n)
+	circ := Circle(Point{0, 0, 0}, 200, n)
 	for i := 0; i < n; i++ {
 		coord := <-circ
 		id := <-contentIds
-		c[i] = &Content{id, coord.X, coord.Y}
+		c[i] = &Content{Id: id, X: coord.X, Y: coord.Y}
 	}
 	return c
 }
 
+func loadChildren(c *Content) []*Content {
+	return nil
+}

@@ -2,16 +2,19 @@ package main
 
 import "math"
 
-type Coords struct {
-	X, Y float
+type Point struct {
+	X, Y, Angle float
 }
 
-func Circle(centerX, centerY, radius float, count int) chan Coords {
-	ch := make(chan Coords)
+func Circle(center Point, radius float, count int) chan Point {
+	ch := make(chan Point)
 	go func() {
 		for i := 0; i < count; i++ {
-			sin, cos := math.Sincos(float64(i)/float64(count)*2*math.Pi)
-			ch <- Coords{centerX + float(sin)*radius, centerY + float(cos)*radius}
+			sin, cos := math.Sincos(float64(i) / float64(count) * 2 * math.Pi)
+			ch <- Point{
+				X: center.X + float(sin)*radius,
+				Y: center.Y + float(cos)*radius,
+			}
 		}
 		close(ch)
 	}()

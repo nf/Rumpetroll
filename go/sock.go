@@ -24,7 +24,7 @@ func SockServer(ws *websocket.Conn) {
 	// send welcome message
 	go func() { ch <- Welcome{Id: id} }()
 	// start read/write loops
-	go readMessages(id, ws, contentLayer(ch))
+	go readMessages(id, ws, ContentLayer(ch))
 	writeMessages(ws, ch)
 }
 

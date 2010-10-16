@@ -20,6 +20,7 @@ type Closed struct {
 }
 
 type Content struct {
-	Id int
-	X, Y float
+	Id          int
+	X, Y, Angle float
+	data        interface{} // store for API data
 }
