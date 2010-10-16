@@ -12,6 +12,7 @@ var _ = log.Print
 
 const (
 	displayDelay = 100e6
+	triggerDistance = 8
 )
 
 var (
@@ -51,7 +52,17 @@ func serveContent(inch, ch MessageChannel) {
 		}
 		// test if close to any content blocks
 		// if so, expand and display additional content
-		_ = u
+		up := Point{X: u.X, Y: u.Y}
+		for _, d := range visibleGroups {
+			cg, ok := d.(*ContentGroup)
+			if !ok {
+				continue
+			}
+			ci := cg.Closest(up, triggerDistance)
+			if ci != nil {
+				log.Println("Trigger", ci)
+			}
+		}
 	}
 }
 
@@ -93,18 +104,24 @@ func NewContentGroup(loadFn func() []*Content) *ContentGroup {
 
 func (cg *ContentGroup) loaded() bool {
 	cg.mu.Lock()
-	if cg.content == nil {
-		return false
-	}
-	cg.mu.Unlock()
-	return true
+	defer cg.mu.Unlock()
+	return cg.content != nil
 }
 
-func (cg *ContentGroup) Closest(x, y, max float) *Content {
+func (cg *ContentGroup) Closest(u Point, max float) *ContentItem {
 	if !cg.loaded() {
 		return nil
 	}
-	return nil
+	var smallest float = max + 1
+	var content *ContentItem
+	for _, ci := range cg.content {
+		d := Distance(u, Point{X:ci.content.X, Y:ci.content.Y})
+		if d <= max && d < smallest {
+			smallest = d
+			content = ci
+		}
+	}
+	return content
 }
 
 func (cg *ContentGroup) Send(ch MessageChannel, ns int64) {

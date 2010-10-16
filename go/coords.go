@@ -20,3 +20,11 @@ func Circle(center Point, radius float, count int) chan Point {
 	}()
 	return ch
 }
+
+func Distance(a, b Point) float {
+	aa := a.X-b.X
+	aa = aa * aa
+	bb := a.Y-b.Y
+	bb = bb * bb
+	return float(math.Sqrt(float64(aa+bb)))
+}
