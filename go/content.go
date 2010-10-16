@@ -15,7 +15,7 @@ const (
 	startThemes = 25
 	minItems = 10
 	displayDelay = 100e6
-	triggerDistance = 12
+	triggerDistance = 20
 	themeSize = 10
 	itemSize = 7
 	itemSpread = 30
@@ -115,7 +115,9 @@ func (ci *ContentItem) Send(ch MessageChannel) {
 	case *powerhouse.Theme:
 		d.Title = data.Title
 	case *powerhouse.Item:
-		d.Body = data.Summary
+		if data.Summary != nil {
+			d.Body = *data.Summary
+		}
 		d.URL = data.Permanent_URL
 		if data.Num_Multimedia == 0 {
 			break

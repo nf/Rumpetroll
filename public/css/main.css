@@ -98,18 +98,18 @@ p {
 	left: 10px;
 	width: 160px;
 	border-radius: 10px;
-	background: #333;
+	background: #111;
 	color: white;
 	font-size: 14pt;
 	padding: 10px;
-	opacity: 0.85;
+	opacity: 0.80;
 	overflow: hidden;
 }
 #display, #display div { display: none; }
 #display .title { font-size: 14pt; }
 #display .body { font-size: 12pt; }
 #display .image {
-	background: #111;
+	background: #333;
 	margin-bottom: 0.5em;
 }
 #display .image img { display: block; }
@@ -235,6 +235,14 @@ a#force-init-button:hover {
 
 #instructions {
 	position: absolute;
-	top: 30px;
-	right: 40px;
+	top: 10px;
+	right: 10px;
+	background: #111;
+	border-radius: 10px;
+	opacity: 0.8;
+	padding: 10px;
 }
+#instructions p {
+	margin-bottom: 0.5em;
+}
+
