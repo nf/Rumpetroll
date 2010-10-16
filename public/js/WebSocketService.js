@@ -53,6 +53,21 @@ var WebSocketService = function(model, webSocket) {
 	this.contentHandler = function(data) {
 		model.content[data.Id] = new Content(data);
 	}
+
+	this.displayHandler = function(data) {
+		$("#display").show().find("div").hide();
+		if (data.Body) $("#display .body").show().text(data.Body);
+		if (data.Title) $("#display .title").show().text(data.Title);
+	}
+
+	this.imageHandler = function(data) {
+		if (data.Multimedia.length == 0) {
+			return;	
+		}
+		var img = data.Multimedia[0].Images.Thumbnail;
+		var $img = $("#display .image").show().find("img");
+		$img.attr("src", img.URL).width(img.Width).height(img.Height);
+	}
 	
 	this.messageHandler = function(data) {
 		var tadpole = model.tadpoles[data.Id];

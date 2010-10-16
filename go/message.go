@@ -1,5 +1,7 @@
 package main
 
+import "powerhouse"
+
 type Update struct {
 	Id                    int
 	Name                  string
@@ -24,3 +26,12 @@ type Content struct {
 	X, Y, Angle float
 	data        interface{} // store for API data
 }
+
+type Display struct {
+	Title, Body, Image string
+}
+
+type Image struct {
+	Multimedia []*powerhouse.Multimedia
+}
+

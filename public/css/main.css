@@ -92,6 +92,27 @@ p {
 	font-weight: bold;
 }
 
+#display {
+	position: absolute;
+	top: 10px;
+	left: 10px;
+	width: 160px;
+	border-radius: 10px;
+	background: #333;
+	color: white;
+	font-size: 14pt;
+	padding: 10px;
+	opacity: 8.5;
+}
+#display, #display div { display: none; }
+#display .title { font-size: 14pt; }
+#display .body { font-size: 12pt; }
+#display .image {
+	background: #111;
+	margin-bottom: 0.5em;
+}
+#display .image img { display: block; }
+
 #cant-connect {
 	/*font-family: "Arial Rounded MT Bold";*/
 	display: none;

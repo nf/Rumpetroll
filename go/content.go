@@ -11,8 +11,10 @@ var _ = log.Print
 
 const (
 	startRadius = 200
+	startThemes = 25
+	minItems = 10
 	displayDelay = 100e6
-	triggerDistance = 8
+	triggerDistance = 15
 )
 
 var (
@@ -53,6 +55,8 @@ func serveContent(inch, ch MessageChannel) {
 	rootContentGroup.Send(ch, displayDelay)
 	visible[rootContentGroup.Id] = rootContentGroup
 
+	var lastSent *ContentItem
+
 	for m := range inch {
 		// before doing anything, forward message to muxer
 		Incoming <- m
@@ -69,12 +73,17 @@ func serveContent(inch, ch MessageChannel) {
 			if ci == nil {
 				continue
 			}
+			if ci != lastSent {
+				log.Println("Display", ci.content.data)
+				ci.Send(ch)
+				lastSent = ci
+			}
+			// load children
 			child := ci.Children()
 			if _, ok := visible[child.Id]; ok {
-				// already visible
-				continue
+				continue // already loaded
 			}
-			log.Println("Show", child)
+			log.Println("Load", child)
 			go child.Send(ch, displayDelay)
 			visible[child.Id] = child
 		}
@@ -96,6 +105,24 @@ func (ci *ContentItem) Children() *ContentGroup {
 	}
 	ci.mu.Unlock()
 	return ci.children
+}
+
+func (ci *ContentItem) Send(ch MessageChannel) {
+	var d Display
+	switch data := ci.content.data.(type) {
+	case *powerhouse.Theme:
+		d.Title = data.Title
+	case *powerhouse.Item:
+		d.Body = data.Summary
+		if data.Num_Multimedia == 0 {
+			break
+		}
+		go func() {
+			time.Sleep(1e6) // delay so that Display is sent first
+			ch <- Image{data.Multimedia()}
+		}()
+	}
+	ch <- d
 }
 
 type ContentGroup struct {
@@ -151,17 +178,28 @@ func (cg *ContentGroup) Send(ch MessageChannel, ns int64) {
 }
 
 func loadStartContent() []*Content {
-	n := 20
-	c := make([]*Content, n)
-	circ := Circle(Point{}, startRadius, n)
-	for i := 0; i < n; i++ {
-		coord := <-circ
+	themes := powerhouse.GetThemes(startThemes, minItems)
+	c := make([]*Content, len(themes))
+	circ := Circle(Point{}, startRadius, len(themes))
+	for i, theme := range themes {
 		id := <-contentIds
-		c[i] = &Content{Id: id, X: coord.X, Y: coord.Y}
+		coord := <-circ
+		c[i] = &Content{Id: id, X: coord.X, Y: coord.Y, data: theme}
 	}
 	return c
 }
 
-func loadChildren(c *Content) []*Content {
-	return nil
+func loadChildren(c *Content) (content []*Content) {
+	switch data := c.data.(type) {
+	case *powerhouse.Theme:
+		items := data.Items()
+		content = make([]*Content, len(items))
+		circ := Circle(Point{c.X, c.Y, c.Angle}, 50, len(items))
+		for i, item := range items {
+			id := <- contentIds
+			coord := <-circ
+			content[i] = &Content{Id: id, X: coord.X, Y: coord.Y, data: item}
+		}
+	}
+	return
 }
