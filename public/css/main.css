@@ -102,7 +102,8 @@ p {
 	color: white;
 	font-size: 14pt;
 	padding: 10px;
-	opacity: 8.5;
+	opacity: 0.85;
+	overflow: hidden;
 }
 #display, #display div { display: none; }
 #display .title { font-size: 14pt; }
@@ -112,13 +113,14 @@ p {
 	margin-bottom: 0.5em;
 }
 #display .image img { display: block; }
+#display a.url { color: #79F; font-size: 12pt; }
 
 #cant-connect {
 	/*font-family: "Arial Rounded MT Bold";*/
 	display: none;
 	position: absolute;
-	top: 200px;
-	left: 10px;
+	top: 20px;
+	left: 180px;
 	padding: 10px 20px;
 	color: rgba(249,136,119,0.9);
 	width: 400px;

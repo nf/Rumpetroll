@@ -57,7 +57,7 @@ var App = function(aSettings, aCanvas) {
 
 		// Draw content
 		for(id in model.content) {
-			model.content[id].draw(context);
+			model.content[id].draw(context, id == model.displayedContent);
 		}
 		
 		// Draw tadpoles

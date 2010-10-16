@@ -55,9 +55,11 @@ var WebSocketService = function(model, webSocket) {
 	}
 
 	this.displayHandler = function(data) {
-		$("#display").show().find("div").hide();
+		$("#display").show().find("div, a").hide();
 		if (data.Body) $("#display .body").show().text(data.Body);
 		if (data.Title) $("#display .title").show().text(data.Title);
+		if (data.URL) $("#display .url").show().attr("href", data.URL);
+		model.displayedContent = data.Id;
 	}
 
 	this.imageHandler = function(data) {

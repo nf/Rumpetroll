@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"math"
 	"powerhouse"
 	"sync"
 	"time"
@@ -14,7 +15,10 @@ const (
 	startThemes = 25
 	minItems = 10
 	displayDelay = 100e6
-	triggerDistance = 15
+	triggerDistance = 12
+	themeSize = 10
+	itemSize = 7
+	itemSpread = 30
 )
 
 var (
@@ -74,7 +78,6 @@ func serveContent(inch, ch MessageChannel) {
 				continue
 			}
 			if ci != lastSent {
-				log.Println("Display", ci.content.data)
 				ci.Send(ch)
 				lastSent = ci
 			}
@@ -83,7 +86,6 @@ func serveContent(inch, ch MessageChannel) {
 			if _, ok := visible[child.Id]; ok {
 				continue // already loaded
 			}
-			log.Println("Load", child)
 			go child.Send(ch, displayDelay)
 			visible[child.Id] = child
 		}
@@ -108,12 +110,13 @@ func (ci *ContentItem) Children() *ContentGroup {
 }
 
 func (ci *ContentItem) Send(ch MessageChannel) {
-	var d Display
+	d := Display{Id: ci.content.Id}
 	switch data := ci.content.data.(type) {
 	case *powerhouse.Theme:
 		d.Title = data.Title
 	case *powerhouse.Item:
 		d.Body = data.Summary
+		d.URL = data.Permanent_URL
 		if data.Num_Multimedia == 0 {
 			break
 		}
@@ -181,10 +184,21 @@ func loadStartContent() []*Content {
 	themes := powerhouse.GetThemes(startThemes, minItems)
 	c := make([]*Content, len(themes))
 	circ := Circle(Point{}, startRadius, len(themes))
+	colors := Colors(Grey, 255, false, len(themes))
 	for i, theme := range themes {
 		id := <-contentIds
 		coord := <-circ
-		c[i] = &Content{Id: id, X: coord.X, Y: coord.Y, data: theme}
+		color := <-colors
+		c[i] = &Content{
+			Id: id,
+			X: coord.X,
+			Y: coord.Y,
+			Angle: coord.Angle,
+			Size: themeSize,
+			Color: color.String(),
+			color: color,
+			data: theme,
+		}
 	}
 	return c
 }
@@ -194,11 +208,22 @@ func loadChildren(c *Content) (content []*Content) {
 	case *powerhouse.Theme:
 		items := data.Items()
 		content = make([]*Content, len(items))
-		circ := Circle(Point{c.X, c.Y, c.Angle}, 50, len(items))
+		spread := Spread(Point{c.X, c.Y, c.Angle}, math.Pi/startThemes, itemSpread, len(items))
+		colors := Colors(c.color, 50, true, len(items))
 		for i, item := range items {
 			id := <- contentIds
-			coord := <-circ
-			content[i] = &Content{Id: id, X: coord.X, Y: coord.Y, data: item}
+			coord := <-spread
+			color := <-colors
+			content[i] = &Content{
+				Id: id,
+				X: coord.X,
+				Y: coord.Y,
+				Angle: coord.Angle,
+				Size: itemSize,
+				Color: color.String(),
+				color: color,
+				data: item,
+			}
 		}
 	}
 	return

@@ -5,8 +5,8 @@ var Content = function(data) {
 	this.x = data.X;
 	this.y = data.Y;
 	this.size = 0;
-	this.targetSize = 10;
-	this.color = '200,200,100';
+	this.targetSize = data.Size;
+	this.color = data.Color;
 
 	function tween(value, target, rate) {
 		var r = value;
@@ -18,13 +18,17 @@ var Content = function(data) {
 		return r
 	}
 
-	this.draw = function(context) {
+	this.draw = function(context, highlight) {
 		// animate
 		content.size = tween(content.size, content.targetSize, 0.1);
 
-		var opacity = 1.0;
+		var opacity = 0.5;
+		if (highlight) {
+			opacity = 1.0;
+		}
+
 		context.fillStyle     = 'rgba('+content.color+','+opacity+')';
-		context.shadowColor   = 'rgba('+content.color+','+opacity*0.7+')';
+		context.shadowColor   = 'rgba('+content.color+','+opacity*0.8+')';
 		context.shadowOffsetX = 0;
 		context.shadowOffsetY = 0;
 		context.shadowBlur    = 10;

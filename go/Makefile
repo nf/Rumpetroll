@@ -6,6 +6,7 @@ include $(GOROOT)/src/Make.inc
 
 TARG=rumpetgo
 GOFILES=\
+	color.go\
 	content.go\
 	coords.go\
 	main.go\

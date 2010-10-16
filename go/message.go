@@ -22,16 +22,18 @@ type Closed struct {
 }
 
 type Content struct {
-	Id          int
-	X, Y, Angle float
-	data        interface{} // store for API data
+	Id                int
+	X, Y, Angle, Size float
+	Color             string
+	color             Color
+	data              interface{} // store for API data
 }
 
 type Display struct {
-	Title, Body, Image string
+	Id int
+	Title, Body, Image, URL string
 }
 
 type Image struct {
 	Multimedia []*powerhouse.Multimedia
 }
-
