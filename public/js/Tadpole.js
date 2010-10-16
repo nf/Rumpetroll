@@ -1,8 +1,10 @@
 var Tadpole = function() {
 	var tadpole = this;
 	
-	this.x = Math.random() * 300 - 150;
-	this.y = Math.random() * 300 - 150;
+	this.x = 0;
+	this.y = 0;
+	//this.x = Math.random() * 300 - 150;
+	//this.y = Math.random() * 300 - 150;
 	this.size = 4;
 	
 	this.name = '';

@@ -24,7 +24,7 @@ func SockServer(ws *websocket.Conn) {
 	// send welcome message
 	go func() { ch <- Welcome{Id: id} }()
 	// start read/write loops
-	go readMessages(id, ws)
+	go readMessages(id, ws, contentLayer(ch))
 	writeMessages(ws, ch)
 }
 
@@ -33,14 +33,14 @@ type inMsg struct {
 	Message *Message
 }
 
-func readMessages(id int, r io.Reader) {
+func readMessages(id int, r io.Reader, ch MessageChannel) {
 	dec := json.NewDecoder(r)
 	for {
 		var blob inMsg
 		err := dec.Decode(&blob)
 		if err != nil {
 			if err == os.EOF {
-				Incoming <- Closed{Id: id}
+				ch <- Closed{Id: id}
 				return
 			}
 			log.Println("decode error:", err)
@@ -48,11 +48,11 @@ func readMessages(id int, r io.Reader) {
 		}
 		if blob.Update != nil {
 			blob.Update.Id = id
-			Incoming <- *blob.Update
+			ch <- *blob.Update
 		}
 		if blob.Message != nil {
 			blob.Message.Id = id
-			Incoming <- *blob.Message
+			ch <- *blob.Message
 		}
 	}
 }

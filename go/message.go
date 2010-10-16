@@ -18,3 +18,8 @@ type Welcome struct {
 type Closed struct {
 	Id int
 }
+
+type Content struct {
+	Id int
+	X, Y float
+}

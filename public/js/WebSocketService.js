@@ -49,6 +49,10 @@ var WebSocketService = function(model, webSocket) {
 		
 		tadpole.timeSinceLastServerUpdate = 0;
 	}
+
+	this.contentHandler = function(data) {
+		model.content[data.Id] = new Content(data);
+	}
 	
 	this.messageHandler = function(data) {
 		var tadpole = model.tadpoles[data.Id];

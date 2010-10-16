@@ -47,14 +47,17 @@ var App = function(aSettings, aCanvas) {
 		}
 	};
 	
-	
-	
 	app.draw = function() {
 		model.camera.setupContext();
 		
 		// Draw waterParticles
 		for(i in model.waterParticles) {
 			model.waterParticles[i].draw(context);
+		}
+
+		// Draw content
+		for(id in model.content) {
+			model.content[id].draw(context);
 		}
 		
 		// Draw tadpoles
@@ -70,8 +73,6 @@ var App = function(aSettings, aCanvas) {
 			model.arrows[i].draw(context, canvas);
 		}
 	};
-		
-	
 	
 	app.onSocketOpen = function(e) {
 		//console.log('Socket opened!', e);

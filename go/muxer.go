@@ -23,7 +23,7 @@ func Muxer() {
 		case Update:
 			id = n.Id
 		case Message:
-			id = n.Id
+			id = -1 // rebroadcast messages
 		case Closed:
 			id = n.Id
 			close(chans[id])
