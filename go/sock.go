@@ -60,7 +60,7 @@ func readMessages(id int, r io.Reader) {
 func writeMessages(w io.Writer, ch chan interface{}) {
 	enc := json.NewEncoder(w)
 	for m := range ch {
-		t := reflect.Typeof(m)
+		t := reflect.TypeOf(m)
 		enc.Encode(map[string]interface{}{
 			"type": t.Name(),
 			"data": m,
