@@ -2,11 +2,10 @@ package main
 
 import (
 	"io"
-	"json"
+	"encoding/json"
 	"log"
-	"os"
 	"reflect"
-	"websocket"
+	"code.google.com/p/go.net/websocket"
 )
 
 var SockHandler = websocket.Handler(SockServer)
@@ -39,7 +38,7 @@ func readMessages(id int, r io.Reader) {
 		var blob inMsg
 		err := dec.Decode(&blob)
 		if err != nil {
-			if err == os.EOF {
+			if err == io.EOF {
 				Incoming <- Closed{Id: id}
 				return
 			}
